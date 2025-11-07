@@ -12,6 +12,7 @@ ordenada: config/, controllers/, middlewares/, routes/, services/, utils/, prism
 - CORS: habilitado para desarrollo
 
 📂 Estructura del proyecto
+```bash
 backend/
 ├─ prisma/
 │  ├─ migrations/
@@ -35,6 +36,8 @@ backend/
 ├─ .gitignore
 ├─ package.json
 └─ README.md
+```
+
 
 ✅ Requisitos
 - Node.js ≥ 18
