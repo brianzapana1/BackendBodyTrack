@@ -130,6 +130,7 @@ Usa el header 'Content-Type: application/json' para las solicitudes POST/PUT/PAT
 
 🧰 Scripts útiles
 
+```bash
 dev: vite-node src/server.js
 start: node src/server.js
 db:gen: prisma generate
@@ -138,6 +139,7 @@ db:studio: prisma studio
 db:migrate: prisma migrate dev --name init
 db:deploy: prisma migrate deploy
 
+```
 
 🛡️ Errores y manejo global
 
