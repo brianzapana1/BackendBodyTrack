@@ -110,6 +110,7 @@ C) Visualización de datos:
 🧪 Postman y pruebas
 Puedes importar una colección con las siguientes rutas básicas:
 
+```bash
 GET    /api/clientes
 GET    /api/clientes/:id
 POST   /api/clientes
@@ -117,6 +118,7 @@ PUT    /api/clientes/:id
 PATCH  /api/clientes/:id
 DELETE /api/clientes/:id
 
+```
 Usa el header 'Content-Type: application/json' para las solicitudes POST/PUT/PATCH.
 
 
