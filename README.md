@@ -4,6 +4,7 @@ ejecutado en desarrollo con vite-node (hot reload rápido). Estructura pensada p
 ordenada: config/, controllers/, middlewares/, routes/, services/, utils/, prisma/, uploads/.
 
 🧱 Stack
+
 - Runtime: Node.js (ESM)
 - Framework: Express
 - ORM: Prisma (PostgreSQL)
@@ -40,6 +41,7 @@ backend/
 
 
 ✅ Requisitos
+
 - Node.js ≥ 18
 - npm ≥ 10
 - PostgreSQL instalado y corriendo
@@ -84,6 +86,7 @@ Endpoint de prueba: http://localhost:4000/api/clientes
 
   
 🗃️ Prisma – flujo de trabajo
+
 A) Crear o editar modelos:
 - Edita prisma/schema.prisma.
 - Ejecuta npm run db:gen para regenerar el cliente.
@@ -95,7 +98,10 @@ B) Migraciones versionadas (recomendado):
 
 C) Visualización de datos:
 - npm run db:studio → abre Prisma Studio en navegador.
+
+  
 ➕ Añadir una nueva tabla o modelo
+
 1. Editar prisma/schema.prisma agregando un nuevo modelo.
 2. Ejecutar npm run db:gen para generar el cliente.
 3. Crear la tabla con npm run db:push o con migración versionada:
@@ -123,6 +129,7 @@ Usa el header 'Content-Type: application/json' para las solicitudes POST/PUT/PAT
 
 
 🧰 Scripts útiles
+
 dev: vite-node src/server.js
 start: node src/server.js
 db:gen: prisma generate
@@ -133,6 +140,7 @@ db:deploy: prisma migrate deploy
 
 
 🛡️ Errores y manejo global
+
 - Middleware notFound: devuelve 404 si la ruta no existe.
 - Middleware errorHandler: captura excepciones no controladas y responde con JSON.
 - Agregar validación de entrada con Zod o Joi.
@@ -142,12 +150,14 @@ db:deploy: prisma migrate deploy
 
 
 🧯 Troubleshooting
+
 - ERR_MODULE_NOT_FOUND: revisa que los imports tengan la extensión .js y ruta correcta.
 - vite-node no arranca: evita rutas con espacios o caracteres especiales.
 - Prisma no conecta: revisa tu DATABASE_URL y que el servidor PostgreSQL esté activo.
 - Cambios de modelo no reflejan: ejecuta npm run db:gen y npm run db:push.
   
 🤝 Contribución
+
 1. Crea una rama: feat/nueva-funcionalidad
 2. Asegúrate de que npm run dev y npm run db:studio funcionen localmente.
 3. Envía un Pull Request con descripción clara (qué, por qué y cómo probar).
