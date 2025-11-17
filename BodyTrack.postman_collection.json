@@ -1,0 +1,653 @@
+{
+	"info": {
+		"_postman_id": "bodytrack-api-collection",
+		"name": "BodyTrack API",
+		"description": "Colección completa de endpoints para la API de BodyTrack",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"    pm.environment.set(\"clienteId\", jsonData.usuario.cliente?.id);",
+									"    pm.environment.set(\"entrenadorId\", jsonData.usuario.entrenador?.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"juan@ejemplo.com\",\n  \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Registrar Cliente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nuevo@ejemplo.com\",\n  \"password\": \"123456\",\n  \"dni\": \"99887766\",\n  \"nombres\": \"Nuevo\",\n  \"apellidos\": \"Usuario\",\n  \"telefono\": \"70999888\",\n  \"genero\": \"M\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/registro/cliente",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "registro", "cliente"]
+						}
+					}
+				},
+				{
+					"name": "Registrar Entrenador",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"trainer@ejemplo.com\",\n  \"password\": \"123456\",\n  \"nombres\": \"Pedro\",\n  \"apellidos\": \"Trainer\",\n  \"especialidad\": \"CrossFit\",\n  \"telefono\": \"70888777\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/registro/entrenador",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "registro", "entrenador"]
+						}
+					}
+				},
+				{
+					"name": "Ver Mi Perfil",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/perfil",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "perfil"]
+						}
+					}
+				},
+				{
+					"name": "Cambiar Contraseña",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"passwordActual\": \"123456\",\n  \"passwordNuevo\": \"nueva123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/cambiar-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "cambiar-password"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Clientes",
+			"item": [
+				{
+					"name": "Listar Clientes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/clientes",
+							"host": ["{{baseUrl}}"],
+							"path": ["clientes"]
+						}
+					}
+				},
+				{
+					"name": "Ver Cliente",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/clientes/{{clienteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["clientes", "{{clienteId}}"]
+						}
+					}
+				},
+				{
+					"name": "Actualizar Cliente",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"telefono\": \"70111222\",\n  \"direccion\": \"Nueva dirección 456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/clientes/{{clienteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["clientes", "{{clienteId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Entrenadores",
+			"item": [
+				{
+					"name": "Listar Entrenadores",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/entrenadores",
+							"host": ["{{baseUrl}}"],
+							"path": ["entrenadores"]
+						}
+					}
+				},
+				{
+					"name": "Ver Entrenador",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/entrenadores/{{entrenadorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["entrenadores", "{{entrenadorId}}"]
+						}
+					}
+				},
+				{
+					"name": "Ver Clientes del Entrenador",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/entrenadores/{{entrenadorId}}/clientes",
+							"host": ["{{baseUrl}}"],
+							"path": ["entrenadores", "{{entrenadorId}}", "clientes"]
+						}
+					}
+				},
+				{
+					"name": "Estadísticas del Entrenador",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/entrenadores/{{entrenadorId}}/estadisticas",
+							"host": ["{{baseUrl}}"],
+							"path": ["entrenadores", "{{entrenadorId}}", "estadisticas"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Progreso",
+			"item": [
+				{
+					"name": "Ver Mi Progreso",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/progreso/cliente/{{clienteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["progreso", "cliente", "{{clienteId}}"]
+						}
+					}
+				},
+				{
+					"name": "Registrar Progreso",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"peso\": 76.5,\n  \"porcentajeGrasa\": 16.8,\n  \"medidaPecho\": 97,\n  \"medidaCintura\": 81,\n  \"medidaCadera\": 93,\n  \"medidaBrazo\": 36,\n  \"medidaPierna\": 56,\n  \"notas\": \"Segunda semana de entrenamiento\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/progreso",
+							"host": ["{{baseUrl}}"],
+							"path": ["progreso"]
+						}
+					}
+				},
+				{
+					"name": "Estadísticas de Progreso",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/progreso/cliente/{{clienteId}}/estadisticas",
+							"host": ["{{baseUrl}}"],
+							"path": ["progreso", "cliente", "{{clienteId}}", "estadisticas"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Ejercicios",
+			"item": [
+				{
+					"name": "Listar Ejercicios",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ejercicios",
+							"host": ["{{baseUrl}}"],
+							"path": ["ejercicios"]
+						}
+					}
+				},
+				{
+					"name": "Buscar Ejercicios",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ejercicios?grupoMuscular=Pecho&busqueda=press",
+							"host": ["{{baseUrl}}"],
+							"path": ["ejercicios"],
+							"query": [
+								{
+									"key": "grupoMuscular",
+									"value": "Pecho"
+								},
+								{
+									"key": "busqueda",
+									"value": "press"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Grupos Musculares",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ejercicios/grupos-musculares",
+							"host": ["{{baseUrl}}"],
+							"path": ["ejercicios", "grupos-musculares"]
+						}
+					}
+				},
+				{
+					"name": "Crear Ejercicio",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Press Inclinado\",\n  \"descripcion\": \"Ejercicio para pecho superior\",\n  \"grupoMuscular\": \"Pecho\",\n  \"equipamiento\": \"Mancuernas\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ejercicios",
+							"host": ["{{baseUrl}}"],
+							"path": ["ejercicios"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Rutinas",
+			"item": [
+				{
+					"name": "Listar Rutinas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rutinas",
+							"host": ["{{baseUrl}}"],
+							"path": ["rutinas"]
+						}
+					}
+				},
+				{
+					"name": "Ver Mi Rutina",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rutinas/mi-rutina",
+							"host": ["{{baseUrl}}"],
+							"path": ["rutinas", "mi-rutina"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Foro",
+			"item": [
+				{
+					"name": "Listar Posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/foro/posts",
+							"host": ["{{baseUrl}}"],
+							"path": ["foro", "posts"]
+						}
+					}
+				},
+				{
+					"name": "Ver Post",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/foro/posts/:postId",
+							"host": ["{{baseUrl}}"],
+							"path": ["foro", "posts", ":postId"],
+							"variable": [
+								{
+									"key": "postId",
+									"value": ""
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Crear Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"titulo\": \"Consejos para principiantes\",\n  \"contenido\": \"Hola a todos, quisiera compartir algunos consejos que me han funcionado...\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/foro/posts",
+							"host": ["{{baseUrl}}"],
+							"path": ["foro", "posts"]
+						}
+					}
+				},
+				{
+					"name": "Comentar Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contenido\": \"Excelente post, gracias por compartir!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/foro/posts/:postId/comentarios",
+							"host": ["{{baseUrl}}"],
+							"path": ["foro", "posts", ":postId", "comentarios"],
+							"variable": [
+								{
+									"key": "postId",
+									"value": ""
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Suscripciones",
+			"item": [
+				{
+					"name": "Ver Suscripción Activa",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/suscripciones/cliente/{{clienteId}}/activa",
+							"host": ["{{baseUrl}}"],
+							"path": ["suscripciones", "cliente", "{{clienteId}}", "activa"]
+						}
+					}
+				},
+				{
+					"name": "Historial de Suscripciones",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/suscripciones/cliente/{{clienteId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["suscripciones", "cliente", "{{clienteId}}"]
+						}
+					}
+				},
+				{
+					"name": "Crear Suscripción",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"plan\": \"PRO\",\n  \"monto\": 200,\n  \"duracionMeses\": 6,\n  \"metodoPago\": \"Tarjeta\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/suscripciones",
+							"host": ["{{baseUrl}}"],
+							"path": ["suscripciones"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4000/health",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "4000",
+					"path": ["health"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:4000/api",
+			"type": "string"
+		}
+	]
+}

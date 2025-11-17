@@ -1,0 +1,297 @@
+# BodyTrack API - Ejemplos de Requests
+
+## Variables
+@baseUrl = http://localhost:4000/api
+@token = tu-token-jwt-aqui
+
+### ============= AUTH =============
+
+### Registrar Cliente
+POST {{baseUrl}}/auth/registro/cliente
+Content-Type: application/json
+
+{
+  "email": "test@ejemplo.com",
+  "password": "123456",
+  "dni": "99999999",
+  "nombres": "Test",
+  "apellidos": "Usuario",
+  "telefono": "70999999",
+  "genero": "M"
+}
+
+### Registrar Entrenador
+POST {{baseUrl}}/auth/registro/entrenador
+Content-Type: application/json
+
+{
+  "email": "entrenador@ejemplo.com",
+  "password": "123456",
+  "nombres": "Pedro",
+  "apellidos": "Trainer",
+  "especialidad": "CrossFit",
+  "telefono": "70888888"
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan@ejemplo.com",
+  "password": "123456"
+}
+
+### Obtener Perfil
+GET {{baseUrl}}/auth/perfil
+Authorization: Bearer {{token}}
+
+### Cambiar Contraseña
+POST {{baseUrl}}/auth/cambiar-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "passwordActual": "123456",
+  "passwordNuevo": "nueva123"
+}
+
+### ============= CLIENTES =============
+
+### Listar Clientes (ENTRENADOR/ADMIN)
+GET {{baseUrl}}/clientes
+Authorization: Bearer {{token}}
+
+### Ver Detalle Cliente
+GET {{baseUrl}}/clientes/client-id-aqui
+Authorization: Bearer {{token}}
+
+### Actualizar Cliente
+PUT {{baseUrl}}/clientes/client-id-aqui
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "telefono": "70111111",
+  "direccion": "Nueva dirección 123"
+}
+
+### ============= ENTRENADORES =============
+
+### Listar Entrenadores
+GET {{baseUrl}}/entrenadores
+Authorization: Bearer {{token}}
+
+### Ver Clientes del Entrenador
+GET {{baseUrl}}/entrenadores/entrenador-id/clientes
+Authorization: Bearer {{token}}
+
+### Estadísticas del Entrenador
+GET {{baseUrl}}/entrenadores/entrenador-id/estadisticas
+Authorization: Bearer {{token}}
+
+### ============= PROGRESO =============
+
+### Listar Progreso del Cliente
+GET {{baseUrl}}/progreso/cliente/cliente-id
+Authorization: Bearer {{token}}
+
+### Crear Registro de Progreso
+POST {{baseUrl}}/progreso
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "clienteId": "cliente-id-aqui",
+  "peso": 78.5,
+  "porcentajeGrasa": 17.5,
+  "medidaPecho": 98,
+  "medidaCintura": 82,
+  "notas": "Me siento con más energía"
+}
+
+### Crear Registro con Fotos (multipart/form-data)
+POST {{baseUrl}}/progreso
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="clienteId"
+
+cliente-id-aqui
+--boundary
+Content-Disposition: form-data; name="peso"
+
+75.0
+--boundary
+Content-Disposition: form-data; name="fotos"; filename="foto1.jpg"
+Content-Type: image/jpeg
+
+< ./ruta/a/foto1.jpg
+--boundary--
+
+### Estadísticas de Progreso
+GET {{baseUrl}}/progreso/cliente/cliente-id/estadisticas
+Authorization: Bearer {{token}}
+
+### ============= EJERCICIOS =============
+
+### Listar Ejercicios
+GET {{baseUrl}}/ejercicios
+Authorization: Bearer {{token}}
+
+### Listar Ejercicios Filtrados
+GET {{baseUrl}}/ejercicios?grupoMuscular=Pecho&equipamiento=Barra
+Authorization: Bearer {{token}}
+
+### Buscar Ejercicios
+GET {{baseUrl}}/ejercicios?busqueda=press
+Authorization: Bearer {{token}}
+
+### Crear Ejercicio (ENTRENADOR/ADMIN)
+POST {{baseUrl}}/ejercicios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Press Inclinado con Mancuernas",
+  "descripcion": "Variante de press para pecho superior",
+  "grupoMuscular": "Pecho",
+  "equipamiento": "Mancuernas"
+}
+
+### Obtener Grupos Musculares
+GET {{baseUrl}}/ejercicios/grupos-musculares
+Authorization: Bearer {{token}}
+
+### ============= RUTINAS =============
+
+### Listar Rutinas
+GET {{baseUrl}}/rutinas
+Authorization: Bearer {{token}}
+
+### Ver Mi Rutina (CLIENTE)
+GET {{baseUrl}}/rutinas/mi-rutina
+Authorization: Bearer {{token}}
+
+### Crear Rutina
+POST {{baseUrl}}/rutinas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "entrenadorId": "entrenador-id-aqui",
+  "nombre": "Rutina Full Body 3x",
+  "descripcion": "Rutina de cuerpo completo 3 veces por semana",
+  "objetivo": "Fuerza",
+  "duracionSemanas": 8,
+  "ejercicios": [
+    {
+      "ejercicioId": "ejercicio-id-1",
+      "dia": 1,
+      "orden": 1,
+      "series": 4,
+      "repeticiones": "5",
+      "descansoSeg": 180
+    },
+    {
+      "ejercicioId": "ejercicio-id-2",
+      "dia": 1,
+      "orden": 2,
+      "series": 3,
+      "repeticiones": "8-10",
+      "descansoSeg": 90
+    }
+  ]
+}
+
+### Agregar Ejercicio a Rutina
+POST {{baseUrl}}/rutinas/rutina-id/ejercicios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "ejercicioId": "ejercicio-id",
+  "dia": 2,
+  "orden": 3,
+  "series": 3,
+  "repeticiones": "12",
+  "descansoSeg": 60,
+  "notas": "Mantener tempo controlado"
+}
+
+### Asignar Rutina a Cliente
+POST {{baseUrl}}/rutinas/rutina-id/asignar
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "clienteId": "cliente-id",
+  "entrenadorId": "entrenador-id",
+  "fechaInicio": "2025-01-01"
+}
+
+### ============= FORO =============
+
+### Listar Posts
+GET {{baseUrl}}/foro/posts
+Authorization: Bearer {{token}}
+
+### Ver Post con Comentarios
+GET {{baseUrl}}/foro/posts/post-id
+Authorization: Bearer {{token}}
+
+### Crear Post
+POST {{baseUrl}}/foro/posts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titulo": "Consejos para mejorar la técnica en sentadillas",
+  "contenido": "Hola, llevo 3 meses entrenando y quiero mejorar mi técnica en sentadillas. ¿Qué recomendaciones tienen?"
+}
+
+### Comentar en Post
+POST {{baseUrl}}/foro/posts/post-id/comentarios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "contenido": "Mi consejo es que trabajes movilidad de tobillos y caderas primero."
+}
+
+### ============= SUSCRIPCIONES =============
+
+### Ver Suscripción Activa
+GET {{baseUrl}}/suscripciones/cliente/cliente-id/activa
+Authorization: Bearer {{token}}
+
+### Crear Suscripción
+POST {{baseUrl}}/suscripciones
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "clienteId": "cliente-id",
+  "plan": "PREMIUM",
+  "monto": 150,
+  "duracionMeses": 3,
+  "metodoPago": "Tarjeta"
+}
+
+### Cancelar Suscripción
+POST {{baseUrl}}/suscripciones/suscripcion-id/cancelar
+Authorization: Bearer {{token}}
+
+### Estadísticas de Suscripciones (ADMIN)
+GET {{baseUrl}}/suscripciones/estadisticas
+Authorization: Bearer {{token}}
+
+### Verificar Suscripciones Expiradas (ADMIN)
+POST {{baseUrl}}/suscripciones/verificar-expiradas
+Authorization: Bearer {{token}}
+
+### ============= HEALTH CHECK =============
+
+### Health Check
+GET http://localhost:4000/health
