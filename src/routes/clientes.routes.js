@@ -1,10 +1,9 @@
 import { Router } from 'express'
 import * as ctrl from '../controllers/clientes.controller.js'
+import { requireAuth, requireRole } from '../middlewares/auth.js'
 
 export const clientes = Router()
-clientes.get('/', ctrl.listar)
-clientes.get('/:id', ctrl.detalle)
-clientes.post('/', ctrl.crear)
-clientes.put('/:id', ctrl.actualizar)     // reemplazo total
-clientes.patch('/:id', ctrl.actualizar)   // actualización parcial
-clientes.delete('/:id', ctrl.eliminar)
+clientes.get('/', requireAuth, requireRole('ENTRENADOR', 'ADMIN'), ctrl.listar)
+clientes.get('/:id', requireAuth, ctrl.detalle)
+clientes.put('/:id', requireAuth, ctrl.actualizar)
+clientes.delete('/:id', requireAuth, requireRole('ADMIN'), ctrl.eliminar)

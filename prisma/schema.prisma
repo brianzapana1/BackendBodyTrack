@@ -7,17 +7,201 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Cliente {
+enum Rol {
+  CLIENTE
+  ENTRENADOR
+  ADMIN
+}
+
+enum Plan {
+  BASICO
+  PREMIUM
+  PRO
+}
+
+enum EstadoSuscripcion {
+  ACTIVA
+  CANCELADA
+  EXPIRADA
+}
+
+// Usuario principal (autenticación)
+model Usuario {
   id            String   @id @default(cuid())
-  dni           String   @unique            // CI/NIT/pasaporte
-  nombres       String
-  apellidos     String
   email         String   @unique
-  telefono      String?
-  fechaNacimiento DateTime?
-  genero        String?                      // "M", "F", "Otro"
-  direccion     String?
-  plan          String    @default("BASICO") // BASICO | PREMIUM | PRO
-  fechaRegistro DateTime @default(now())
+  password      String   // hash bcrypt
+  rol           Rol      @default(CLIENTE)
   activo        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relaciones
+  cliente       Cliente?
+  entrenador    Entrenador?
+  foroPost      ForoPost[]
+  foroComentario ForoComentario[]
+}
+
+// Perfil de Cliente
+model Cliente {
+  id              String   @id @default(cuid())
+  usuarioId       String   @unique
+  dni             String   @unique
+  nombres         String
+  apellidos       String
+  telefono        String?
+  fechaNacimiento DateTime?
+  genero          String?  // "M", "F", "Otro"
+  direccion       String?
+  plan            Plan     @default(BASICO)
+  fechaRegistro   DateTime @default(now())
+  
+  // Relaciones
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  progreso        RegistroProgreso[]
+  rutinasAsignadas AsignacionRutina[]
+  suscripciones   Suscripcion[]
+}
+
+// Perfil de Entrenador
+model Entrenador {
+  id              String   @id @default(cuid())
+  usuarioId       String   @unique
+  nombres         String
+  apellidos       String
+  especialidad    String?  // Ej: "Musculación", "CrossFit", "Funcional"
+  certificaciones String?  // JSON o texto
+  telefono        String?
+  bio             String?
+  fechaRegistro   DateTime @default(now())
+  
+  // Relaciones
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  rutinas         Rutina[]
+  asignaciones    AsignacionRutina[]
+}
+
+// Registro de progreso del cliente
+model RegistroProgreso {
+  id              String   @id @default(cuid())
+  clienteId       String
+  fecha           DateTime @default(now())
+  peso            Float?
+  porcentajeGrasa Float?
+  medidaPecho     Float?
+  medidaCintura   Float?
+  medidaCadera    Float?
+  medidaBrazo     Float?
+  medidaPierna    Float?
+  fotos           String[] // URLs o paths de fotos
+  notas           String?
+  
+  // Relaciones
+  cliente         Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+}
+
+// Catálogo de ejercicios
+model Ejercicio {
+  id              String   @id @default(cuid())
+  nombre          String
+  descripcion     String?
+  grupoMuscular   String   // Ej: "Pecho", "Espalda", "Piernas"
+  equipamiento    String?  // Ej: "Mancuernas", "Barra", "Máquina"
+  videoUrl        String?
+  imagenUrl       String?
+  createdAt       DateTime @default(now())
+  
+  // Relaciones
+  rutinaEjercicios RutinaEjercicio[]
+}
+
+// Plan de entrenamiento creado por entrenador
+model Rutina {
+  id              String   @id @default(cuid())
+  entrenadorId    String
+  nombre          String
+  descripcion     String?
+  objetivo        String?  // Ej: "Hipertrofia", "Pérdida de peso", "Fuerza"
+  duracionSemanas Int?
+  createdAt       DateTime @default(now())
+  
+  // Relaciones
+  entrenador      Entrenador @relation(fields: [entrenadorId], references: [id], onDelete: Cascade)
+  ejercicios      RutinaEjercicio[]
+  asignaciones    AsignacionRutina[]
+}
+
+// Ejercicios dentro de una rutina (con series, reps, etc)
+model RutinaEjercicio {
+  id              String   @id @default(cuid())
+  rutinaId        String
+  ejercicioId     String
+  orden           Int      @default(0)
+  dia             Int      // 1-7 (Lunes a Domingo) o 0 para "cualquier día"
+  series          Int
+  repeticiones    String   // Ej: "12", "10-12", "al fallo"
+  descansoSeg     Int?     // Descanso en segundos
+  notas           String?
+  
+  // Relaciones
+  rutina          Rutina   @relation(fields: [rutinaId], references: [id], onDelete: Cascade)
+  ejercicio       Ejercicio @relation(fields: [ejercicioId], references: [id], onDelete: Cascade)
+}
+
+// Asignación de rutina a un cliente
+model AsignacionRutina {
+  id              String   @id @default(cuid())
+  clienteId       String
+  rutinaId        String
+  entrenadorId    String
+  fechaInicio     DateTime @default(now())
+  fechaFin        DateTime?
+  activa          Boolean  @default(true)
+  
+  // Relaciones
+  cliente         Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  rutina          Rutina   @relation(fields: [rutinaId], references: [id], onDelete: Cascade)
+  entrenador      Entrenador @relation(fields: [entrenadorId], references: [id], onDelete: Cascade)
+}
+
+// Foro - Posts
+model ForoPost {
+  id              String   @id @default(cuid())
+  usuarioId       String
+  titulo          String
+  contenido       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relaciones
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  comentarios     ForoComentario[]
+}
+
+// Foro - Comentarios
+model ForoComentario {
+  id              String   @id @default(cuid())
+  postId          String
+  usuarioId       String
+  contenido       String
+  createdAt       DateTime @default(now())
+  
+  // Relaciones
+  post            ForoPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+}
+
+// Suscripciones (historial de pagos/planes)
+model Suscripcion {
+  id              String   @id @default(cuid())
+  clienteId       String
+  plan            Plan
+  estado          EstadoSuscripcion @default(ACTIVA)
+  fechaInicio     DateTime @default(now())
+  fechaFin        DateTime
+  monto           Float
+  metodoPago      String?  // Ej: "Tarjeta", "Transferencia"
+  
+  // Relaciones
+  cliente         Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 }
