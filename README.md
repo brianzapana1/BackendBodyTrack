@@ -58,14 +58,64 @@ Backend completo para la plataforma **BodyTrack** - Sistema integral de gestión
 - ✅ Verificación automática de expiración
 - ✅ Estadísticas de ingresos (Admin)
 
-## 🔧 Instalación
+## 🔧 Instalación y Ejecución
 
-1. **Clonar e instalar dependencias**
+### Opción 1: Docker (Recomendado para equipos) 🐳
+
+La forma más rápida de ejecutar el proyecto con PostgreSQL incluido:
+
+1. **Asegúrate de tener Docker y Docker Compose instalados**
+   - [Instalar Docker](https://docs.docker.com/get-docker/)
+
+2. **Clonar el repositorio**
+```bash
+git clone <repo-url>
+cd BackendBodyTrack
+```
+
+3. **Configurar variables de entorno (opcional)**
+   - El archivo `docker-compose.yml` ya tiene valores por defecto
+   - Para personalizar, crea un archivo `.env` con tus valores
+
+4. **Construir y ejecutar con Docker Compose**
+```bash
+docker-compose up --build
+```
+
+Esto hará automáticamente:
+- Iniciar PostgreSQL en un contenedor
+- Esperar a que la base de datos esté lista
+- Generar el cliente de Prisma (`npm run db:gen`)
+- Sincronizar el schema con la BD (`npm run db:push`)
+- Iniciar el servidor de desarrollo con hot-reload
+
+5. **Verificar que funciona**
+```bash
+curl http://localhost:4000/health
+```
+
+6. **Detener los contenedores**
+```bash
+docker-compose down
+```
+
+Para eliminar también los datos de la BD:
+```bash
+docker-compose down -v
+```
+
+### Opción 2: Instalación Local
+
+Si prefieres ejecutar Node.js y PostgreSQL directamente en tu máquina:
+
+1. **Instalar PostgreSQL** (versión 12 o superior)
+
+2. **Clonar e instalar dependencias**
 ```bash
 npm install
 ```
 
-2. **Configurar variables de entorno**
+3. **Configurar variables de entorno**
 ```bash
 cp .env.example .env
 ```
@@ -77,12 +127,13 @@ JWT_SECRET="tu-super-secreto-cambiar-en-produccion"
 PORT=4000
 ```
 
-3. **Aplicar schema a la base de datos**
+4. **Aplicar schema a la base de datos**
 ```bash
+npm run db:gen
 npm run db:push
 ```
 
-4. **Iniciar servidor**
+5. **Iniciar servidor**
 ```bash
 # Desarrollo (con hot-reload)
 npm run dev
@@ -215,14 +266,95 @@ npm start
 # Generar cliente Prisma
 npm run db:gen
 
-# Sincronizar schema con DB
+# Sincronizar schema con DB (desarrollo)
 npm run db:push
 
 # Abrir Prisma Studio (GUI de BD)
 npm run db:studio
+
+# Docker - Construir y ejecutar
+docker-compose up --build
+
+# Docker - Ejecutar en segundo plano
+docker-compose up -d
+
+# Docker - Ver logs
+docker-compose logs -f app
+
+# Docker - Detener contenedores
+docker-compose down
+
+# Docker - Acceder al contenedor de la app
+docker-compose exec app sh
+
+# Docker - Ejecutar comandos Prisma dentro del contenedor
+docker-compose exec app npm run db:studio
 ```
 
-## 📝 Ejemplo de Registro y Login
+## 🗄️ Backup y Restauración de Base de Datos
+
+### Hacer Backup (PostgreSQL)
+
+**Desde Docker:**
+```bash
+docker-compose exec db pg_dump -U postgres -Fc appdb > backup_$(date +%Y%m%d_%H%M%S).dump
+```
+
+**Desde instalación local:**
+```bash
+pg_dump -h localhost -U postgres -Fc -f backup_$(date +%Y%m%d_%H%M%S).dump bodytrack
+```
+
+### Restaurar Backup
+
+**Con Docker:**
+```bash
+# Detener la app para evitar conexiones activas
+docker-compose stop app
+
+# Restaurar
+docker-compose exec -T db pg_restore -U postgres -d appdb -c < backup_20241119_150000.dump
+
+# Reiniciar la app
+docker-compose start app
+```
+
+**Local:**
+```bash
+pg_restore -h localhost -U postgres -d bodytrack -c backup_20241119_150000.dump
+```
+
+### ⚠️ Consideraciones sobre Cambios en el Schema
+
+- **`npm run db:push`** (usado en desarrollo):
+  - Sincroniza el schema de Prisma con la base de datos
+  - Generalmente **no elimina** datos existentes
+  - **Riesgo:** cambios complejos pueden causar pérdidas de datos
+  - **Recomendación:** hacer backup antes de cambios importantes
+
+- **Migraciones de Prisma** (recomendado para staging/producción):
+  ```bash
+  # Crear migración versionada
+  npx prisma migrate dev --name descripcion_cambio
+  
+  # Aplicar migraciones en producción
+  npx prisma migrate deploy
+  ```
+
+- **Antes de cambios importantes:**
+  1. Hacer backup de la BD
+  2. Probar cambios en entorno de desarrollo
+  3. Revisar SQL generado por migraciones
+  4. Aplicar en producción con precaución
+
+## 📝 Probando los Endpoints
+
+### 1. Health Check
+```bash
+curl http://localhost:4000/health
+```
+
+### 2. Ejemplo de Registro y Login
 
 **Registrar Cliente:**
 ```bash
@@ -260,6 +392,27 @@ Respuesta:
   }
 }
 ```
+
+### 3. Usar el Token para Endpoints Protegidos
+
+Una vez que tengas el token, úsalo en las siguientes peticiones:
+
+```bash
+# Obtener perfil
+curl http://localhost:4000/api/auth/perfil \
+  -H "Authorization: Bearer TU_TOKEN_AQUI"
+
+# Listar clientes (requiere rol ENTRENADOR o ADMIN)
+curl http://localhost:4000/api/clientes \
+  -H "Authorization: Bearer TU_TOKEN_AQUI"
+```
+
+### 4. Colección de Postman
+
+Para probar más fácilmente, puedes:
+- Importar los endpoints en Postman
+- Usar la variable `{{baseUrl}}` = `http://localhost:4000`
+- Guardar el token en una variable de entorno para reutilizarlo
 
 ## 🤝 Contribuir
 
