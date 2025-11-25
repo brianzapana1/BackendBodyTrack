@@ -15,7 +15,18 @@ export const registrarCliente = async (req, res, next) => {
   try {
     required(req.body, ['email', 'password', 'dni', 'nombres', 'apellidos'])
     const resultado = await svc.registrarCliente(req.body)
-    res.status(201).json(resultado)
+    
+    // Set refresh token as HTTP-only cookie
+    res.cookie('refreshToken', resultado.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    })
+    
+    // Don't send refresh token in response body
+    const { refreshToken, ...response } = resultado
+    res.status(201).json(response)
   } catch (e) {
     next(e)
   }
@@ -28,7 +39,18 @@ export const registrarEntrenador = async (req, res, next) => {
   try {
     required(req.body, ['email', 'password', 'nombres', 'apellidos'])
     const resultado = await svc.registrarEntrenador(req.body)
-    res.status(201).json(resultado)
+    
+    // Set refresh token as HTTP-only cookie
+    res.cookie('refreshToken', resultado.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    })
+    
+    // Don't send refresh token in response body
+    const { refreshToken, ...response } = resultado
+    res.status(201).json(response)
   } catch (e) {
     next(e)
   }
@@ -41,7 +63,18 @@ export const login = async (req, res, next) => {
   try {
     required(req.body, ['email', 'password'])
     const resultado = await svc.login(req.body.email, req.body.password)
-    res.json(resultado)
+    
+    // Set refresh token as HTTP-only cookie
+    res.cookie('refreshToken', resultado.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    })
+    
+    // Don't send refresh token in response body
+    const { refreshToken, ...response } = resultado
+    res.json(response)
   } catch (e) {
     next(e)
   }
@@ -71,6 +104,40 @@ export const cambiarPassword = async (req, res, next) => {
       req.body.passwordNuevo
     )
     res.json(resultado)
+  } catch (e) {
+    next(e)
+  }
+}
+
+/**
+ * POST /api/auth/refresh
+ */
+export const refreshToken = async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies.refreshToken
+    
+    if (!refreshToken) {
+      throw Object.assign(new Error('No se proporcionó token de actualización'), { status: 401 })
+    }
+    
+    const resultado = await svc.refreshAccessToken(refreshToken)
+    res.json(resultado)
+  } catch (e) {
+    next(e)
+  }
+}
+
+/**
+ * POST /api/auth/logout
+ */
+export const logout = async (req, res, next) => {
+  try {
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    })
+    res.json({ mensaje: 'Sesión cerrada correctamente' })
   } catch (e) {
     next(e)
   }

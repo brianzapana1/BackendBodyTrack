@@ -14,7 +14,9 @@ Backend completo para la plataforma **BodyTrack** - Sistema integral de gestión
 
 ### Autenticación y Usuarios
 - ✅ Registro de Clientes y Entrenadores
-- ✅ Login con JWT
+- ✅ Login con JWT (Access + Refresh tokens)
+- ✅ **Autenticación segura con HttpOnly cookies**
+- ✅ Refresh token automático (15 min access, 7 días refresh)
 - ✅ 3 roles: CLIENTE, ENTRENADOR, ADMIN
 - ✅ Cambio de contraseña
 - ✅ Middleware de autorización por roles
@@ -148,6 +150,8 @@ npm start
 - `POST /api/auth/registro/cliente` - Registrar cliente
 - `POST /api/auth/registro/entrenador` - Registrar entrenador
 - `POST /api/auth/login` - Iniciar sesión
+- `POST /api/auth/refresh` - Renovar access token (usa refresh token en cookie)
+- `POST /api/auth/logout` - Cerrar sesión (limpia refresh token cookie)
 - `GET /api/auth/perfil` - Obtener perfil (requiere auth)
 - `POST /api/auth/cambiar-password` - Cambiar contraseña
 
@@ -214,11 +218,46 @@ npm start
 
 ## 🔐 Autenticación
 
-Todas las rutas (excepto registro y login) requieren token JWT en el header:
+### Sistema de Autenticación Seguro
+
+El proyecto implementa un sistema de autenticación con **doble token** para máxima seguridad:
+
+#### Access Token (JWT)
+- **Duración**: 15 minutos
+- **Almacenamiento**: Memoria del navegador (no localStorage)
+- **Uso**: Se envía en header `Authorization: Bearer <token>` en cada petición
+- **Ventaja**: Si es robado, expira rápido
+
+#### Refresh Token (JWT)
+- **Duración**: 7 días
+- **Almacenamiento**: Cookie HttpOnly (inaccesible para JavaScript)
+- **Uso**: Se envía automáticamente en cookies para renovar access token
+- **Seguridad**: 
+  - `httpOnly: true` - No accesible vía JavaScript (protección XSS)
+  - `sameSite: 'strict'` - Protección contra CSRF
+  - `secure: true` en producción - Solo HTTPS
+
+#### Flujo de Autenticación
+
+```
+1. Login → Backend genera access token (15 min) + refresh token (7 días)
+2. Backend guarda refresh token en cookie HttpOnly
+3. Frontend guarda access token en memoria
+4. Cada petición usa access token en header Authorization
+5. Antes de expirar (14 min), frontend llama /api/auth/refresh automáticamente
+6. Backend valida refresh token de la cookie y genera nuevo access token
+7. Proceso se repite cada 15 minutos mientras usuario esté activo
+```
+
+### Usar la API
+
+Todas las rutas protegidas requieren token JWT en el header:
 
 ```
 Authorization: Bearer <tu-token-jwt>
 ```
+
+El frontend debe incluir `withCredentials: true` en peticiones para enviar cookies.
 
 ## 📁 Estructura del Proyecto
 

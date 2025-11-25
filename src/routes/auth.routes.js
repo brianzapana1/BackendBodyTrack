@@ -8,6 +8,8 @@ export const auth = Router()
 auth.post('/registro/cliente', ctrl.registrarCliente)
 auth.post('/registro/entrenador', ctrl.registrarEntrenador)
 auth.post('/login', ctrl.login)
+auth.post('/refresh', ctrl.refreshToken)
+auth.post('/logout', ctrl.logout)
 
 // Rutas protegidas
 auth.get('/perfil', requireAuth, ctrl.obtenerPerfil)

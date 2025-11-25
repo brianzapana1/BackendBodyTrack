@@ -3,7 +3,9 @@ import jwt from 'jsonwebtoken'
 import { prisma } from '../config/prisma.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret-key-change-in-production'
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m'
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-key-change-in-production'
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
 
 /**
  * Registrar un nuevo usuario Cliente
@@ -50,9 +52,11 @@ export const registrarCliente = async (data) => {
   })
 
   const token = jwt.sign({ id: usuario.id, rol: usuario.rol }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+  const refreshToken = jwt.sign({ id: usuario.id }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN })
 
   return {
     token,
+    refreshToken,
     usuario: {
       id: usuario.id,
       email: usuario.email,
@@ -97,9 +101,11 @@ export const registrarEntrenador = async (data) => {
   })
 
   const token = jwt.sign({ id: usuario.id, rol: usuario.rol }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+  const refreshToken = jwt.sign({ id: usuario.id }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN })
 
   return {
     token,
+    refreshToken,
     usuario: {
       id: usuario.id,
       email: usuario.email,
@@ -135,12 +141,14 @@ export const login = async (email, password) => {
   }
 
   const token = jwt.sign({ id: usuario.id, rol: usuario.rol }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+  const refreshToken = jwt.sign({ id: usuario.id }, REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN })
 
   // No devolver el password
   const { password: _, ...usuarioSinPassword } = usuario
 
   return {
     token,
+    refreshToken,
     usuario: usuarioSinPassword
   }
 }
@@ -188,4 +196,31 @@ export const cambiarPassword = async (usuarioId, passwordActual, passwordNuevo) 
   })
 
   return { mensaje: 'Contraseña actualizada correctamente' }
+}
+
+/**
+ * Refresh access token using refresh token
+ */
+export const refreshAccessToken = async (refreshToken) => {
+  try {
+    const payload = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET)
+    
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: payload.id },
+      include: {
+        cliente: true,
+        entrenador: true
+      }
+    })
+
+    if (!usuario || !usuario.activo) {
+      throw Object.assign(new Error('Usuario no encontrado o inactivo'), { status: 401 })
+    }
+
+    const newAccessToken = jwt.sign({ id: usuario.id, rol: usuario.rol }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+
+    return { token: newAccessToken }
+  } catch (error) {
+    throw Object.assign(new Error('Token de actualización inválido o expirado'), { status: 401 })
+  }
 }
