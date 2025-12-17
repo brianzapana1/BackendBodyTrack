@@ -53,6 +53,8 @@ model Cliente {
   fechaNacimiento DateTime?
   genero          String?  // "M", "F", "Otro"
   direccion       String?
+  peso            Float?   // Peso actual en kg
+  altura          Float?   // Altura en cm
   plan            Plan     @default(BASICO)
   fechaRegistro   DateTime @default(now())
   

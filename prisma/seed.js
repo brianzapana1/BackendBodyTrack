@@ -88,7 +88,9 @@ async function main() {
           telefono: '70123456',
           fechaNacimiento: new Date('1990-05-15'),
           genero: 'M',
-          plan: 'PREMIUM'
+          plan: 'PREMIUM',
+          peso: 75.5,
+          altura: 175
         }
       }
     },
@@ -108,7 +110,9 @@ async function main() {
           telefono: '70654321',
           fechaNacimiento: new Date('1995-08-20'),
           genero: 'F',
-          plan: 'BASICO'
+          plan: 'BASICO',
+          peso: 62.0,
+          altura: 165
         }
       }
     },

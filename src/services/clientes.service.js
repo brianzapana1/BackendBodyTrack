@@ -46,9 +46,11 @@ export const buscarPorId = (id) => prisma.cliente.findUnique({
   }
 })
 
-export const actualizar = (id, data) => {
-  const { nombres, apellidos, telefono, fechaNacimiento, genero, direccion, plan } = data
-  return prisma.cliente.update({ 
+export const actualizar = async (id, data) => {
+  const { nombres, apellidos, telefono, fechaNacimiento, genero, direccion, plan, peso, altura } = data
+  
+  // Update cliente data
+  const cliente = await prisma.cliente.update({ 
     where: { id }, 
     data: {
       nombres,
@@ -57,9 +59,23 @@ export const actualizar = (id, data) => {
       fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : undefined,
       genero,
       direccion,
-      plan
+      plan,
+      peso: peso !== undefined ? parseFloat(peso) : undefined,
+      altura: altura !== undefined ? parseFloat(altura) : undefined
+    },
+    include: {
+      usuario: {
+        select: {
+          id: true,
+          email: true,
+          rol: true,
+          activo: true
+        }
+      }
     }
   })
+  
+  return cliente
 }
 
 export const eliminar = (id) => prisma.cliente.delete({ where: { id } })

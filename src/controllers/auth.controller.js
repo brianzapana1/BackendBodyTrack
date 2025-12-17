@@ -86,6 +86,16 @@ export const login = async (req, res, next) => {
 export const obtenerPerfil = async (req, res, next) => {
   try {
     const perfil = await svc.obtenerPerfil(req.user.id)
+    // Add nombres and apellidos from Usuario to root for easy access
+    if (perfil.cliente) {
+      perfil.nombres = perfil.cliente.nombres
+      perfil.apellidos = perfil.cliente.apellidos
+      perfil.telefono = perfil.cliente.telefono
+    } else if (perfil.entrenador) {
+      perfil.nombres = perfil.entrenador.nombres
+      perfil.apellidos = perfil.entrenador.apellidos
+      perfil.telefono = perfil.entrenador.telefono
+    }
     res.json(perfil)
   } catch (e) {
     next(e)

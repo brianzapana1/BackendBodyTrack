@@ -55,9 +55,10 @@ export const buscarPorId = (id) => {
 /**
  * Actualizar perfil de entrenador
  */
-export const actualizar = (id, data) => {
+export const actualizar = async (id, data) => {
   const { nombres, apellidos, especialidad, certificaciones, telefono, bio } = data
-  return prisma.entrenador.update({
+  
+  const entrenador = await prisma.entrenador.update({
     where: { id },
     data: {
       nombres,
@@ -66,8 +67,20 @@ export const actualizar = (id, data) => {
       certificaciones,
       telefono,
       bio
+    },
+    include: {
+      usuario: {
+        select: {
+          id: true,
+          email: true,
+          rol: true,
+          activo: true
+        }
+      }
     }
   })
+  
+  return entrenador
 }
 
 /**
