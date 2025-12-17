@@ -30,7 +30,7 @@ export const buscarPorId = (id) => {
 /**
  * Crear nuevo registro de progreso
  */
-export const crear = (data) => {
+export const crear = async (data) => {
   const {
     clienteId,
     peso,
@@ -44,7 +44,8 @@ export const crear = (data) => {
     notas
   } = data
 
-  return prisma.registroProgreso.create({
+  // Crear el registro de progreso
+  const registro = await prisma.registroProgreso.create({
     data: {
       clienteId,
       peso: peso ? parseFloat(peso) : null,
@@ -58,6 +59,16 @@ export const crear = (data) => {
       notas
     }
   })
+
+  // Si se registró peso, actualizar el peso actual del cliente
+  if (peso) {
+    await prisma.cliente.update({
+      where: { id: clienteId },
+      data: { peso: parseFloat(peso) }
+    })
+  }
+
+  return registro
 }
 
 /**

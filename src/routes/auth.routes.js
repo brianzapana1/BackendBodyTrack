@@ -13,4 +13,5 @@ auth.post('/logout', ctrl.logout)
 
 // Rutas protegidas
 auth.get('/perfil', requireAuth, ctrl.obtenerPerfil)
+auth.put('/perfil', requireAuth, ctrl.actualizarPerfil)
 auth.post('/cambiar-password', requireAuth, ctrl.cambiarPassword)

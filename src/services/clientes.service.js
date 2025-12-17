@@ -49,6 +49,9 @@ export const buscarPorId = (id) => prisma.cliente.findUnique({
 export const actualizar = async (id, data) => {
   const { nombres, apellidos, telefono, fechaNacimiento, genero, direccion, plan, peso, altura } = data
   
+  // Get current cliente data to check if weight changed
+  const clienteActual = await prisma.cliente.findUnique({ where: { id } })
+  
   // Update cliente data
   const cliente = await prisma.cliente.update({ 
     where: { id }, 
@@ -74,6 +77,17 @@ export const actualizar = async (id, data) => {
       }
     }
   })
+  
+  // If weight was updated and different from current, create a progress record
+  if (peso !== undefined && parseFloat(peso) !== clienteActual.peso) {
+    await prisma.registroProgreso.create({
+      data: {
+        clienteId: id,
+        peso: parseFloat(peso),
+        notas: 'Peso actualizado desde el perfil'
+      }
+    })
+  }
   
   return cliente
 }

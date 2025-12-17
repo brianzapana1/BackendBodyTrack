@@ -32,6 +32,9 @@ model Usuario {
   password      String   // hash bcrypt
   rol           Rol      @default(CLIENTE)
   activo        Boolean  @default(true)
+  nombres       String?  // Nombre(s) del usuario
+  apellidos     String?  // Apellidos del usuario
+  telefono      String?  // Teléfono de contacto
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   

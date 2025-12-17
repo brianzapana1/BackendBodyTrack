@@ -120,6 +120,18 @@ export const cambiarPassword = async (req, res, next) => {
 }
 
 /**
+ * PUT /api/auth/perfil
+ */
+export const actualizarPerfil = async (req, res, next) => {
+  try {
+    const resultado = await svc.actualizarPerfil(req.user.id, req.body)
+    res.json(resultado)
+  } catch (e) {
+    next(e)
+  }
+}
+
+/**
  * POST /api/auth/refresh
  */
 export const refreshToken = async (req, res, next) => {

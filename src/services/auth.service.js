@@ -11,7 +11,7 @@ const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
  * Registrar un nuevo usuario Cliente
  */
 export const registrarCliente = async (data) => {
-  const { email, password, dni, nombres, apellidos, telefono, fechaNacimiento, genero, direccion } = data
+  const { email, password, dni, nombres, apellidos, telefono, fechaNacimiento, genero, direccion, peso, altura } = data
 
   // Verificar si ya existe
   const existente = await prisma.usuario.findUnique({ where: { email } })
@@ -42,6 +42,8 @@ export const registrarCliente = async (data) => {
           fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
           genero,
           direccion,
+          peso: peso ? parseFloat(peso) : null,
+          altura: altura ? parseFloat(altura) : null,
           plan: 'BASICO'
         }
       }
@@ -170,6 +172,27 @@ export const obtenerPerfil = async (usuarioId) => {
   }
 
   const { password: _, ...usuarioSinPassword } = usuario
+  
+  // If Usuario doesn't have nombres/apellidos/telefono, get from Cliente or Entrenador
+  if (!usuarioSinPassword.nombres && usuarioSinPassword.cliente) {
+    usuarioSinPassword.nombres = usuarioSinPassword.cliente.nombres
+  }
+  if (!usuarioSinPassword.apellidos && usuarioSinPassword.cliente) {
+    usuarioSinPassword.apellidos = usuarioSinPassword.cliente.apellidos
+  }
+  if (!usuarioSinPassword.telefono && usuarioSinPassword.cliente) {
+    usuarioSinPassword.telefono = usuarioSinPassword.cliente.telefono
+  }
+  if (!usuarioSinPassword.nombres && usuarioSinPassword.entrenador) {
+    usuarioSinPassword.nombres = usuarioSinPassword.entrenador.nombres
+  }
+  if (!usuarioSinPassword.apellidos && usuarioSinPassword.entrenador) {
+    usuarioSinPassword.apellidos = usuarioSinPassword.entrenador.apellidos
+  }
+  if (!usuarioSinPassword.telefono && usuarioSinPassword.entrenador) {
+    usuarioSinPassword.telefono = usuarioSinPassword.entrenador.telefono
+  }
+  
   return usuarioSinPassword
 }
 
@@ -196,6 +219,53 @@ export const cambiarPassword = async (usuarioId, passwordActual, passwordNuevo) 
   })
 
   return { mensaje: 'Contraseña actualizada correctamente' }
+}
+
+/**
+ * Actualizar perfil de usuario (para ADMIN o campos comunes)
+ */
+export const actualizarPerfil = async (usuarioId, data) => {
+  const { nombres, apellidos, telefono } = data
+
+  // Update Usuario table
+  const usuario = await prisma.usuario.update({
+    where: { id: usuarioId },
+    data: {
+      nombres,
+      apellidos,
+      telefono
+    },
+    include: {
+      cliente: true,
+      entrenador: true
+    }
+  })
+
+  // Also update Cliente or Entrenador if they exist (to keep data in sync)
+  if (usuario.cliente) {
+    await prisma.cliente.update({
+      where: { id: usuario.cliente.id },
+      data: {
+        nombres,
+        apellidos,
+        telefono
+      }
+    })
+  }
+  
+  if (usuario.entrenador) {
+    await prisma.entrenador.update({
+      where: { id: usuario.entrenador.id },
+      data: {
+        nombres,
+        apellidos,
+        telefono
+      }
+    })
+  }
+
+  const { password: _, ...usuarioSinPassword } = usuario
+  return usuarioSinPassword
 }
 
 /**
