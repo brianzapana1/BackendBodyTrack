@@ -110,7 +110,7 @@ async function main() {
           telefono: '70654321',
           fechaNacimiento: new Date('1995-08-20'),
           genero: 'F',
-          plan: 'BASICO',
+          plan: 'FREE',
           peso: 62.0,
           altura: 165
         }
@@ -157,6 +157,92 @@ async function main() {
     }
   })
   console.log('✅ Rutina creada')
+
+  // 5b. Crear Rutinas Genéricas (para usuarios FREE)
+  const rutinaGenericaPrincipiante = await prisma.rutina.create({
+    data: {
+      entrenadorId: entrenador1.entrenador.id,
+      nombre: 'Rutina Principiante - Full Body',
+      descripcion: 'Rutina de cuerpo completo ideal para comenzar en el gimnasio. 3 días por semana.',
+      objetivo: 'Fuerza',
+      duracionSemanas: 8,
+      esGenerica: true,
+      ejercicios: {
+        create: [
+          // Día 1
+          { ejercicioId: todosEjercicios[0].id, dia: 1, orden: 1, series: 3, repeticiones: '10-12', descansoSeg: 90 },
+          { ejercicioId: todosEjercicios[1].id, dia: 1, orden: 2, series: 3, repeticiones: '10', descansoSeg: 90 },
+          { ejercicioId: todosEjercicios[2].id, dia: 1, orden: 3, series: 3, repeticiones: '8-10', descansoSeg: 120 },
+          { ejercicioId: todosEjercicios[4].id, dia: 1, orden: 4, series: 2, repeticiones: '12', descansoSeg: 60 },
+          // Día 2
+          { ejercicioId: todosEjercicios[5].id, dia: 2, orden: 1, series: 3, repeticiones: '12', descansoSeg: 60 },
+          { ejercicioId: todosEjercicios[3].id, dia: 2, orden: 2, series: 3, repeticiones: '10', descansoSeg: 90 },
+          { ejercicioId: todosEjercicios[6].id, dia: 2, orden: 3, series: 3, repeticiones: '10', descansoSeg: 60 },
+          // Día 3
+          { ejercicioId: todosEjercicios[0].id, dia: 3, orden: 1, series: 3, repeticiones: '10', descansoSeg: 90 },
+          { ejercicioId: todosEjercicios[2].id, dia: 3, orden: 2, series: 3, repeticiones: '8', descansoSeg: 120 },
+          { ejercicioId: todosEjercicios[4].id, dia: 3, orden: 3, series: 3, repeticiones: '12', descansoSeg: 60 }
+        ]
+      }
+    }
+  })
+
+  const rutinaGenericaIntermedio = await prisma.rutina.create({
+    data: {
+      entrenadorId: entrenador2.entrenador.id,
+      nombre: 'Rutina Intermedia - Hipertrofia',
+      descripcion: 'Rutina de 4 días enfocada en ganancia muscular para nivel intermedio.',
+      objetivo: 'Hipertrofia',
+      duracionSemanas: 12,
+      esGenerica: true,
+      ejercicios: {
+        create: [
+          // Día 1 - Pecho y Tríceps
+          { ejercicioId: todosEjercicios[0].id, dia: 1, orden: 1, series: 4, repeticiones: '8-10', descansoSeg: 90 },
+          { ejercicioId: todosEjercicios[5].id, dia: 1, orden: 2, series: 3, repeticiones: '10-12', descansoSeg: 60 },
+          { ejercicioId: todosEjercicios[7].id, dia: 1, orden: 3, series: 3, repeticiones: '12', descansoSeg: 60 },
+          // Día 2 - Espalda y Bíceps
+          { ejercicioId: todosEjercicios[1].id, dia: 2, orden: 1, series: 4, repeticiones: '6-8', descansoSeg: 120 },
+          { ejercicioId: todosEjercicios[3].id, dia: 2, orden: 2, series: 3, repeticiones: '10', descansoSeg: 90 },
+          { ejercicioId: todosEjercicios[6].id, dia: 2, orden: 3, series: 3, repeticiones: '12', descansoSeg: 60 },
+          // Día 3 - Piernas
+          { ejercicioId: todosEjercicios[2].id, dia: 3, orden: 1, series: 4, repeticiones: '6-8', descansoSeg: 150 },
+          { ejercicioId: todosEjercicios[8].id, dia: 3, orden: 2, series: 3, repeticiones: '10', descansoSeg: 90 },
+          // Día 4 - Hombros y Abs
+          { ejercicioId: todosEjercicios[9].id, dia: 4, orden: 1, series: 4, repeticiones: '10', descansoSeg: 90 },
+          { ejercicioId: todosEjercicios[4].id, dia: 4, orden: 2, series: 3, repeticiones: 'al fallo', descansoSeg: 60 }
+        ]
+      }
+    }
+  })
+
+  const rutinaGenericaPerdidaPeso = await prisma.rutina.create({
+    data: {
+      entrenadorId: entrenador2.entrenador.id,
+      nombre: 'Rutina Pérdida de Peso - Circuito',
+      descripcion: 'Rutina de alta intensidad combinando fuerza y cardio para quemar grasa.',
+      objetivo: 'Pérdida de peso',
+      duracionSemanas: 10,
+      esGenerica: true,
+      ejercicios: {
+        create: [
+          // Día 1 - Circuito Superior
+          { ejercicioId: todosEjercicios[0].id, dia: 1, orden: 1, series: 3, repeticiones: '15', descansoSeg: 45 },
+          { ejercicioId: todosEjercicios[3].id, dia: 1, orden: 2, series: 3, repeticiones: '15', descansoSeg: 45 },
+          { ejercicioId: todosEjercicios[4].id, dia: 1, orden: 3, series: 3, repeticiones: '20', descansoSeg: 30 },
+          // Día 2 - Circuito Inferior
+          { ejercicioId: todosEjercicios[2].id, dia: 2, orden: 1, series: 4, repeticiones: '12', descansoSeg: 60 },
+          { ejercicioId: todosEjercicios[8].id, dia: 2, orden: 2, series: 3, repeticiones: '15', descansoSeg: 45 },
+          // Día 3 - Circuito Full Body
+          { ejercicioId: todosEjercicios[1].id, dia: 3, orden: 1, series: 3, repeticiones: '12', descansoSeg: 60 },
+          { ejercicioId: todosEjercicios[2].id, dia: 3, orden: 2, series: 3, repeticiones: '12', descansoSeg: 60 },
+          { ejercicioId: todosEjercicios[5].id, dia: 3, orden: 3, series: 3, repeticiones: '15', descansoSeg: 45 }
+        ]
+      }
+    }
+  })
+
+  console.log('✅ Rutinas genéricas creadas (3)')
 
   // 6. Asignar rutina a cliente
   await prisma.asignacionRutina.create({

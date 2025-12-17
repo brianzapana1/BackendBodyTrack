@@ -1,13 +1,23 @@
 import { prisma } from '../config/prisma.js'
 
 /**
- * Listar rutinas (filtrado por entrenador si se especifica)
+ * Listar rutinas (filtrado por entrenador, plan de usuario, etc.)
  */
 export const listar = (filtros = {}) => {
   const where = {}
   
+  // Filtro por entrenador (para entrenadores viendo sus propias rutinas)
   if (filtros.entrenadorId) {
     where.entrenadorId = filtros.entrenadorId
+  }
+
+  // Filtro por plan de usuario (para clientes)
+  if (filtros.planUsuario) {
+    if (filtros.planUsuario === 'FREE') {
+      // Usuarios FREE solo ven rutinas genéricas
+      where.esGenerica = true
+    }
+    // PREMIUM users don't get filtered - they see all routines (generic + personalized)
   }
 
   return prisma.rutina.findMany({

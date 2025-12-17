@@ -89,3 +89,32 @@ export const optionalAuth = async (req, res, next) => {
   }
   next()
 }
+
+/**
+ * Middleware para verificar que el cliente tenga plan PREMIUM
+ * Debe usarse después de requireAuth
+ */
+export const requirePremium = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'No autenticado' })
+  }
+
+  // Solo aplica a clientes
+  if (req.user.rol !== 'CLIENTE') {
+    return next() // Entrenadores y admins pasan automáticamente
+  }
+
+  if (!req.user.cliente) {
+    return res.status(404).json({ error: 'Perfil de cliente no encontrado' })
+  }
+
+  if (req.user.cliente.plan !== 'PREMIUM') {
+    return res.status(403).json({ 
+      error: 'Función exclusiva para usuarios PREMIUM',
+      requierePremium: true
+    })
+  }
+
+  next()
+}
+

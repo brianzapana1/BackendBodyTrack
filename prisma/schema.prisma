@@ -14,9 +14,8 @@ enum Rol {
 }
 
 enum Plan {
-  BASICO
+  FREE
   PREMIUM
-  PRO
 }
 
 enum EstadoSuscripcion {
@@ -58,7 +57,7 @@ model Cliente {
   direccion       String?
   peso            Float?   // Peso actual en kg
   altura          Float?   // Altura en cm
-  plan            Plan     @default(BASICO)
+  plan            Plan     @default(FREE)
   fechaRegistro   DateTime @default(now())
   
   // Relaciones

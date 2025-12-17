@@ -22,6 +22,11 @@ export const listar = async (req, res, next) => {
       filtros.entrenadorId = req.user.entrenador?.id
     }
 
+    // Si es cliente, filtrar según su plan
+    if (req.user.rol === 'CLIENTE') {
+      filtros.planUsuario = req.user.cliente?.plan || 'FREE'
+    }
+
     res.json(await svc.listar(filtros))
   } catch (e) {
     next(e)

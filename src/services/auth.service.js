@@ -44,7 +44,7 @@ export const registrarCliente = async (data) => {
           direccion,
           peso: peso ? parseFloat(peso) : null,
           altura: altura ? parseFloat(altura) : null,
-          plan: 'BASICO'
+          plan: 'FREE'
         }
       }
     },

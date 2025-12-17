@@ -1,11 +1,24 @@
 import { prisma } from '../config/prisma.js'
 
 /**
- * Listar progreso de un cliente
+ * Listar progreso de un cliente con límites según su plan
  */
-export const listarPorCliente = (clienteId) => {
+export const listarPorCliente = async (clienteId, planUsuario = 'FREE') => {
+  const where = { clienteId }
+  
+  // FREE users: solo últimos 3 meses
+  if (planUsuario === 'FREE') {
+    const tresMesesAtras = new Date()
+    tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3)
+    
+    where.fecha = {
+      gte: tresMesesAtras
+    }
+  }
+  // PREMIUM users: sin límite de tiempo
+
   return prisma.registroProgreso.findMany({
-    where: { clienteId },
+    where,
     orderBy: { fecha: 'desc' }
   })
 }

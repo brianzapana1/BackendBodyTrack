@@ -12,7 +12,14 @@ export const listarPorCliente = async (req, res, next) => {
       return res.status(403).json({ error: 'No autorizado' })
     }
 
-    res.json(await svc.listarPorCliente(clienteId))
+    // Obtener el plan del cliente para aplicar límites
+    let planUsuario = 'FREE'
+    if (req.user.rol === 'CLIENTE') {
+      planUsuario = req.user.cliente?.plan || 'FREE'
+    }
+    // Entrenadores/admins ven todo sin límites (considerados como PREMIUM)
+
+    res.json(await svc.listarPorCliente(clienteId, planUsuario))
   } catch (e) {
     next(e)
   }

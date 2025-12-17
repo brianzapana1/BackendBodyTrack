@@ -1,138 +1,92 @@
 import * as svc from '../services/suscripciones.service.js'
 
-const required = (obj, fields) => {
-  for (const f of fields) {
-    if (obj[f] == null || obj[f] === '') {
-      throw Object.assign(new Error(`Campo requerido: ${f}`), { status: 400 })
-    }
-  }
-}
-
 /**
- * GET /api/suscripciones/cliente/:clienteId
+ * GET /api/suscripciones/planes
+ * Obtener todos los planes disponibles (público)
  */
-export const listarPorCliente = async (req, res, next) => {
+export const obtenerPlanes = async (req, res, next) => {
   try {
-    const { clienteId } = req.params
-
-    // Solo el propio cliente o admin pueden ver las suscripciones
-    if (req.user.rol === 'CLIENTE' && req.user.cliente?.id !== clienteId) {
-      return res.status(403).json({ error: 'No autorizado' })
-    }
-
-    res.json(await svc.listarPorCliente(clienteId))
+    const planes = await svc.obtenerPlanes()
+    res.json(planes)
   } catch (e) {
     next(e)
   }
 }
 
 /**
- * GET /api/suscripciones/:id
+ * GET /api/suscripciones/mi-suscripcion
+ * Obtener la suscripción activa del cliente autenticado
  */
-export const detalle = async (req, res, next) => {
+export const obtenerMiSuscripcion = async (req, res, next) => {
   try {
-    const suscripcion = await svc.buscarPorId(req.params.id)
-    if (!suscripcion) {
-      return res.status(404).json({ error: 'Suscripción no encontrada' })
+    // Verificar que es un cliente
+    if (req.user.rol !== 'CLIENTE') {
+      return res.status(403).json({ error: 'Solo clientes pueden ver su suscripción' })
     }
 
-    // Verificar autorización
-    if (req.user.rol === 'CLIENTE' && req.user.cliente?.id !== suscripcion.clienteId) {
-      return res.status(403).json({ error: 'No autorizado' })
+    if (!req.user.cliente) {
+      return res.status(404).json({ error: 'Perfil de cliente no encontrado' })
     }
 
-    res.json(suscripcion)
+    const resultado = await svc.obtenerMiSuscripcion(req.user.cliente.id)
+    res.json(resultado)
   } catch (e) {
     next(e)
   }
 }
 
 /**
- * POST /api/suscripciones
+ * POST /api/suscripciones/contratar
+ * Contratar un plan premium (simulación de pago)
  */
-export const crear = async (req, res, next) => {
+export const contratarPlan = async (req, res, next) => {
   try {
-    required(req.body, ['clienteId', 'plan', 'monto'])
-
-    // Si es cliente, solo puede crear su propia suscripción
-    if (req.user.rol === 'CLIENTE' && req.user.cliente?.id !== req.body.clienteId) {
-      return res.status(403).json({ error: 'No autorizado' })
+    // Verificar que es un cliente
+    if (req.user.rol !== 'CLIENTE') {
+      return res.status(403).json({ error: 'Solo clientes pueden contratar planes' })
     }
 
-    const nueva = await svc.crear(req.body)
-    res.status(201).json(nueva)
+    if (!req.user.cliente) {
+      return res.status(404).json({ error: 'Perfil de cliente no encontrado' })
+    }
+
+    const { plan, datosSimulacion } = req.body
+
+    if (!plan) {
+      return res.status(400).json({ error: 'El campo "plan" es requerido' })
+    }
+
+    const resultado = await svc.contratarPlan(
+      req.user.cliente.id,
+      plan,
+      datosSimulacion
+    )
+
+    res.status(201).json(resultado)
   } catch (e) {
     next(e)
   }
 }
 
 /**
- * POST /api/suscripciones/:id/cancelar
+ * POST /api/suscripciones/cancelar
+ * Cancelar la suscripción activa del cliente autenticado
  */
-export const cancelar = async (req, res, next) => {
+export const cancelarSuscripcion = async (req, res, next) => {
   try {
-    const suscripcion = await svc.buscarPorId(req.params.id)
-    if (!suscripcion) {
-      return res.status(404).json({ error: 'Suscripción no encontrada' })
+    // Verificar que es un cliente
+    if (req.user.rol !== 'CLIENTE') {
+      return res.status(403).json({ error: 'Solo clientes pueden cancelar su suscripción' })
     }
 
-    // Solo el cliente dueño o admin pueden cancelar
-    if (req.user.rol === 'CLIENTE' && req.user.cliente?.id !== suscripcion.clienteId) {
-      return res.status(403).json({ error: 'No autorizado' })
+    if (!req.user.cliente) {
+      return res.status(404).json({ error: 'Perfil de cliente no encontrado' })
     }
 
-    res.json(await svc.cancelar(req.params.id))
+    const resultado = await svc.cancelarSuscripcion(req.user.cliente.id)
+    res.json(resultado)
   } catch (e) {
     next(e)
   }
 }
 
-/**
- * GET /api/suscripciones/cliente/:clienteId/activa
- */
-export const obtenerSuscripcionActiva = async (req, res, next) => {
-  try {
-    const { clienteId } = req.params
-
-    // Verificar autorización
-    if (req.user.rol === 'CLIENTE' && req.user.cliente?.id !== clienteId) {
-      return res.status(403).json({ error: 'No autorizado' })
-    }
-
-    const suscripcion = await svc.obtenerSuscripcionActiva(clienteId)
-    
-    if (!suscripcion) {
-      return res.status(404).json({ error: 'No hay suscripción activa' })
-    }
-
-    res.json(suscripcion)
-  } catch (e) {
-    next(e)
-  }
-}
-
-/**
- * POST /api/suscripciones/verificar-expiradas (Admin only)
- */
-export const verificarExpiradas = async (req, res, next) => {
-  try {
-    const cantidad = await svc.verificarSuscripcionesExpiradas()
-    res.json({ 
-      mensaje: `Se actualizaron ${cantidad} suscripciones expiradas`,
-      cantidad
-    })
-  } catch (e) {
-    next(e)
-  }
-}
-
-/**
- * GET /api/suscripciones/estadisticas (Admin only)
- */
-export const obtenerEstadisticas = async (_req, res, next) => {
-  try {
-    res.json(await svc.obtenerEstadisticas())
-  } catch (e) {
-    next(e)
-  }
-}
