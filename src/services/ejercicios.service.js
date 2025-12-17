@@ -1,9 +1,19 @@
 import { prisma } from '../config/prisma.js'
 
 /**
+ * Normalizar texto removiendo acentos para búsqueda
+ */
+const normalizarTexto = (texto) => {
+  return texto
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
+/**
  * Listar todos los ejercicios
  */
-export const listar = (filtros = {}) => {
+export const listar = async (filtros = {}) => {
   const where = {}
   
   if (filtros.grupoMuscular) {
@@ -14,17 +24,25 @@ export const listar = (filtros = {}) => {
     where.equipamiento = filtros.equipamiento
   }
 
-  if (filtros.busqueda) {
-    where.OR = [
-      { nombre: { contains: filtros.busqueda, mode: 'insensitive' } },
-      { descripcion: { contains: filtros.busqueda, mode: 'insensitive' } }
-    ]
-  }
-
-  return prisma.ejercicio.findMany({
+  // Si hay búsqueda, primero obtener todos los ejercicios que cumplan otros filtros
+  // y luego filtrar por búsqueda con normalización
+  let ejercicios = await prisma.ejercicio.findMany({
     where,
     orderBy: { nombre: 'asc' }
   })
+
+  // Filtrar por búsqueda sin acentos si se proporciona
+  if (filtros.busqueda) {
+    const busquedaNormalizada = normalizarTexto(filtros.busqueda)
+    ejercicios = ejercicios.filter(ej => {
+      const nombreNormalizado = normalizarTexto(ej.nombre || '')
+      const descripcionNormalizada = normalizarTexto(ej.descripcion || '')
+      return nombreNormalizado.includes(busquedaNormalizada) || 
+             descripcionNormalizada.includes(busquedaNormalizada)
+    })
+  }
+
+  return ejercicios
 }
 
 /**
