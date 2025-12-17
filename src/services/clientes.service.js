@@ -7,6 +7,18 @@ export const listar = () => prisma.cliente.findMany({
         email: true,
         activo: true
       }
+    },
+    rutinasAsignadas: {
+      where: { activa: true },
+      include: {
+        rutina: {
+          select: {
+            id: true,
+            nombre: true,
+            objetivo: true
+          }
+        }
+      }
     }
   },
   orderBy: { fechaRegistro: 'desc' } 

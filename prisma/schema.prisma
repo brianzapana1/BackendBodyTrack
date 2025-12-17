@@ -128,6 +128,7 @@ model Rutina {
   descripcion     String?
   objetivo        String?  // Ej: "Hipertrofia", "Pérdida de peso", "Fuerza"
   duracionSemanas Int?
+  esGenerica      Boolean  @default(false) // true = generic/template, false = personalized
   createdAt       DateTime @default(now())
   
   // Relaciones
